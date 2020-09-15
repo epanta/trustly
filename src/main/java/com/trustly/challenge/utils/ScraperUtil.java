@@ -10,13 +10,12 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class ScraperUtil {
 
-    static final String URL_GIT = "https://github.com";
-    static final String separator = "/";
-
     public static final String HREF = "href";
     public static final String projectsClass = "text-bold flex-auto min-width-0";
     public static final String fileAndDirectoriesClass = "js-navigation-open link-gray-dark";
     public static final String dataFileClass = "text-mono f6 flex-auto pr-3 flex-order-2 flex-md-order-1 mt-2 mt-md-0";
+    static final String URL_GIT = "https://github.com";
+    static final String separator = "/";
 
     public String getUrlConnection(final String path) {
         StringBuilder stringBuilder = new StringBuilder(URL_GIT);
@@ -30,7 +29,7 @@ public class ScraperUtil {
 
         final String[] name = fileName.split("\\.");
         if (name != null) {
-            extension = "." + name[name.length-1].trim();
+            extension = "." + name[name.length - 1].trim();
         }
         return extension;
     }

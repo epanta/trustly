@@ -22,8 +22,8 @@ public class DataController {
     ResponseEntity<ResponseDataDto> findData(final @PathVariable("userId") String userId) {
 
         ResponseDataDto responseDataDto = ResponseDataDto
-                                                .builder()
-                                                .dataMap(dataService.findData(userId)).build();
+                .builder()
+                .dataMap(dataService.findData(userId)).build();
         return ResponseEntity.ok(responseDataDto);
     }
 }

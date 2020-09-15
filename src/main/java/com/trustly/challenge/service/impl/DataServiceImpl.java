@@ -19,9 +19,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class DataServiceImpl implements DataService {
 
-    HashMap<String, FileData> map = new HashMap<>();
-
     private final ScraperUtil scraperUtil;
+    HashMap<String, FileData> map = new HashMap<>();
 
     @Override
     public HashMap<String, FileData> findData(final String user) {
@@ -58,7 +57,7 @@ public class DataServiceImpl implements DataService {
 
                     if (!filePathName.contains("commit")) {
                         if (filePathName.contains("tree")) {
-                            System.out.println("Folder Name: " + scraperUtil.getUrlConnection(filePathName));
+                            //System.out.println("Folder Name: " + scraperUtil.getUrlConnection(filePathName));
                             scrapeRepository(filePathName);
                         } else if (filePathName.contains("blob")) {
                             scrapeFile(file.ownText(), filePathName);
