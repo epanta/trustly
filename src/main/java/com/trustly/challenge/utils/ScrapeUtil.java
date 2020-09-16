@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 
 @Component
 @RequiredArgsConstructor
-public class ScraperUtil {
+public class ScrapeUtil {
 
     public static final String HREF = "href";
     public static final String projectsClass = "text-bold flex-auto min-width-0";

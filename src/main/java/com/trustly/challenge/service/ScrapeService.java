@@ -4,7 +4,7 @@ import com.trustly.challenge.model.FileData;
 
 import java.util.HashMap;
 
-public interface DataService {
+public interface ScrapeService {
 
     HashMap<String, FileData> findData(String user);
 }
