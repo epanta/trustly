@@ -1,7 +1,7 @@
 package com.trustly.challenge.resource;
 
 import com.trustly.challenge.dto.ResponseDataDto;
-import com.trustly.challenge.exception.BusinessException;
+import com.trustly.challenge.exception.ProjectException;
 import com.trustly.challenge.service.ScrapeService;
 import lombok.RequiredArgsConstructor;
 import lombok.Synchronized;
@@ -31,7 +31,7 @@ public class ScrapeController {
             }
 
             return ResponseEntity.ok(responseDataDto);
-        } catch (BusinessException e) {
+        } catch (ProjectException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

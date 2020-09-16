@@ -1,6 +1,8 @@
 package com.trustly.challenge.service.impl;
 
-import com.trustly.challenge.exception.BusinessException;
+import com.trustly.challenge.exception.FileDataException;
+import com.trustly.challenge.exception.ProjectException;
+import com.trustly.challenge.exception.RepositoryDataException;
 import com.trustly.challenge.model.FileData;
 import com.trustly.challenge.service.ScrapeService;
 import com.trustly.challenge.utils.ScrapeUtil;
@@ -11,6 +13,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
 
@@ -27,25 +30,28 @@ public class ScrapeServiceImpl implements ScrapeService {
 
         try {
             final String newUrl = scrapeUtil.getUrlConnection(user);
-
-            final Document doc = Jsoup.connect(newUrl).get();
+            final Document doc = getDocument(newUrl);
             final Elements repositories = doc.getElementsByClass(scrapeUtil.projectsClass);
 
             for (Element repository : repositories) {
                 final String projectName = repository.attr(scrapeUtil.HREF);
                 scrapeRepository(projectName);
             }
+        } catch (RepositoryDataException e) {
+            throw new ProjectException("Error while reading repository name.", e);
+        } catch (FileDataException e) {
+            throw new ProjectException("Error while reading file names.", e);
         } catch (Exception e) {
-            throw new BusinessException("Error while reading project names.");
+            throw new ProjectException("Error while reading project names.", e);
         }
         return dataMap;
     }
 
-    private void scrapeRepository(String urlBase) {
+    public void scrapeRepository(String urlBase) {
         final String newUrlBase = scrapeUtil.getUrlConnection(urlBase);
 
         try {
-            final Document doc = Jsoup.connect(newUrlBase).get();
+            final Document doc = getDocument(newUrlBase);
             final Elements details = doc.getElementsByClass(scrapeUtil.fileAndDirectoriesClass);
 
             for (Element detail : details) {
@@ -64,20 +70,20 @@ public class ScrapeServiceImpl implements ScrapeService {
                 }
             }
         } catch (Exception e) {
-            throw new BusinessException("Error while reading file names.");
+            throw new RepositoryDataException();
         }
     }
 
-    private void scrapeFile(final String fileName, final String filePathName) {
+    public void scrapeFile(final String fileName, final String filePathName) {
         final String newUrlBase = scrapeUtil.getUrlConnection(filePathName);
 
         try {
-            final Document doc = Jsoup.connect(newUrlBase).get();
+            final Document doc = getDocument(newUrlBase);
             final String linesAndSize = doc.getElementsByClass(scrapeUtil.dataFileClass).text();
 
             addOrUpdateData(fileName, linesAndSize);
         } catch (Exception e) {
-            throw new BusinessException("Error while reading data file.");
+            throw new FileDataException();
         }
     }
 
@@ -89,5 +95,9 @@ public class ScrapeServiceImpl implements ScrapeService {
         dataMap.put(ext, FileData.builder()
                 .totalBytes(size)
                 .totalLines(lines).build());
+    }
+
+    public Document getDocument(final String newUrl) throws IOException {
+        return Jsoup.connect(newUrl).get();
     }
 }

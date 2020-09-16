@@ -1,6 +1,6 @@
 package com.trustly.challenge.resource;
 
-import com.trustly.challenge.exception.BusinessException;
+import com.trustly.challenge.exception.ProjectException;
 import com.trustly.challenge.model.FileData;
 import com.trustly.challenge.service.ScrapeService;
 import org.junit.jupiter.api.Test;
@@ -45,7 +45,7 @@ public class ScrapeControllerTest {
     @Test
     public void shouldSearchDataByInvalidUser() throws Exception {
 
-        BDDMockito.given(this.scrapeService.findData(Mockito.anyString())).willThrow(BusinessException.class);
+        BDDMockito.given(this.scrapeService.findData(Mockito.anyString())).willThrow(ProjectException.class);
 
         mvc.perform(MockMvcRequestBuilders.get(URI)
                 .accept(MediaType.APPLICATION_JSON))
