@@ -31,11 +31,12 @@ public class ScrapeControllerTest {
     private ScrapeService scrapeService;
 
     private static String URI = "/api/github/epanta";
+    private static String URI_REPO = "/api/github?url=https://github.com/epanta/trustly";
 
     @Test
-    public void shouldBeNotFoundWhenSearchDataByInvalidUser() throws Exception {
+    public void shouldBeNotFoundWhenSearchDataByInvalidUserWhenFindDataByUser() throws Exception {
 
-        BDDMockito.given(this.scrapeService.findData(Mockito.anyString())).willReturn(new HashMap<>());
+        BDDMockito.given(this.scrapeService.findDataByUser(Mockito.anyString())).willReturn(new HashMap<>());
 
         mvc.perform(MockMvcRequestBuilders.get(URI)
                 .accept(MediaType.APPLICATION_JSON))
@@ -43,11 +44,31 @@ public class ScrapeControllerTest {
     }
 
     @Test
-    public void shouldSearchDataByInvalidUser() throws Exception {
+    public void shouldBeNotFoundWhenSearchDataByInvalidUserWhenFindDataByUrl() throws Exception {
 
-        BDDMockito.given(this.scrapeService.findData(Mockito.anyString())).willThrow(ProjectException.class);
+        BDDMockito.given(this.scrapeService.findDataByUrl(Mockito.anyString())).willReturn(new HashMap<>());
+
+        mvc.perform(MockMvcRequestBuilders.get(URI_REPO)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void shouldSearchDataByInvalidUserWhenFindDataByUser() throws Exception {
+
+        BDDMockito.given(this.scrapeService.findDataByUser(Mockito.anyString())).willThrow(ProjectException.class);
 
         mvc.perform(MockMvcRequestBuilders.get(URI)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void shouldSearchDataByInvalidUserWhenFindDataByUrl() throws Exception {
+
+        BDDMockito.given(this.scrapeService.findDataByUrl(Mockito.anyString())).willThrow(ProjectException.class);
+
+        mvc.perform(MockMvcRequestBuilders.get(URI_REPO)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
@@ -58,9 +79,22 @@ public class ScrapeControllerTest {
         HashMap<String, FileData> fileDataHashMap = new HashMap<>();
         fileDataHashMap.put(".csv", new FileData());
 
-        BDDMockito.given(this.scrapeService.findData(Mockito.anyString())).willReturn(fileDataHashMap);
+        BDDMockito.given(this.scrapeService.findDataByUser(Mockito.anyString())).willReturn(fileDataHashMap);
 
         mvc.perform(MockMvcRequestBuilders.get(URI)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void shouldBeOkWhenSearchDataByValidUserWhenFindDataByUrl() throws Exception {
+
+        HashMap<String, FileData> fileDataHashMap = new HashMap<>();
+        fileDataHashMap.put(".csv", new FileData());
+
+        BDDMockito.given(this.scrapeService.findDataByUrl(Mockito.anyString())).willReturn(fileDataHashMap);
+
+        mvc.perform(MockMvcRequestBuilders.get(URI_REPO)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }

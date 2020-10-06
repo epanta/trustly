@@ -6,5 +6,7 @@ import java.util.HashMap;
 
 public interface ScrapeService {
 
-    HashMap<String, FileData> findData(String user);
+    HashMap<String, FileData> findDataByUser(String user);
+
+    HashMap<String, FileData> findDataByUrl(String url);
 }

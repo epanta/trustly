@@ -7,6 +7,7 @@ import com.trustly.challenge.model.FileData;
 import com.trustly.challenge.service.ScrapeService;
 import com.trustly.challenge.utils.ScrapeUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ScrapeServiceImpl implements ScrapeService {
@@ -25,17 +27,34 @@ public class ScrapeServiceImpl implements ScrapeService {
     private HashMap<String, FileData> dataMap;
 
     @Override
-    public HashMap<String, FileData> findData(final String user) {
-        dataMap = new HashMap<>();
+    public HashMap<String, FileData> findDataByUser(final String user) {
+        final String newUrl = scrapeUtil.getUrlConnection(user,
+                "?tab=repositories");
+        return getFindData(newUrl, user, null);
+    }
 
+    @Override
+    public HashMap<String, FileData> findDataByUrl(final String url) {
+        final String user = scrapeUtil.getUser(url);
+        final String newUrl = scrapeUtil.getUrlConnection(user,
+                "?tab=repositories");
+        return getFindData(newUrl, user, scrapeUtil.getRepositorio(url));
+    }
+
+    private HashMap<String, FileData> getFindData(final String newUrl,
+                                                  final String user,
+                                                  final String repo) {
+        dataMap = new HashMap<>();
         try {
-            final String newUrl = scrapeUtil.getUrlConnection(user);
             final Document doc = getDocument(newUrl);
             final Elements repositories = doc.getElementsByClass(scrapeUtil.projectsClass);
 
             for (Element repository : repositories) {
-                final String projectName = repository.attr(scrapeUtil.HREF);
-                scrapeRepository(projectName);
+                final String projectName = repository.text();
+                if (scrapeUtil.isValidRepository(projectName, repo)) {
+                    log.info("m=getFindData, finding data project={}", projectName);
+                    scrapeRepository(scrapeUtil.getUri(user, projectName));
+                }
             }
         } catch (RepositoryDataException e) {
             throw new ProjectException("Error while reading repository name.", e);
@@ -47,8 +66,8 @@ public class ScrapeServiceImpl implements ScrapeService {
         return dataMap;
     }
 
-    public void scrapeRepository(String urlBase) {
-        final String newUrlBase = scrapeUtil.getUrlConnection(urlBase);
+    public void scrapeRepository(final String uriBase) {
+        final String newUrlBase = scrapeUtil.getUrlConnection(uriBase);
 
         try {
             final Document doc = getDocument(newUrlBase);

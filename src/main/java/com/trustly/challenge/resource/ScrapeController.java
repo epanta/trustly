@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -20,11 +21,29 @@ public class ScrapeController {
 
     @Synchronized
     @GetMapping("{userId}")
-    ResponseEntity<?> findData(final @PathVariable("userId") String userId) {
+    ResponseEntity<?> findDataByUser(final @PathVariable("userId") String userId) {
         try {
             ResponseDataDto responseDataDto = ResponseDataDto
                     .builder()
-                    .dataMap(scrapeService.findData(userId)).build();
+                    .dataMap(scrapeService.findDataByUser(userId)).build();
+
+            if (responseDataDto.getDataMap().isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            return ResponseEntity.ok(responseDataDto);
+        } catch (ProjectException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @Synchronized
+    @GetMapping
+    ResponseEntity<?> findDataByUrl(final @RequestParam("url") String url) {
+        try {
+            ResponseDataDto responseDataDto = ResponseDataDto
+                    .builder()
+                    .dataMap(scrapeService.findDataByUrl(url)).build();
 
             if (responseDataDto.getDataMap().isEmpty()) {
                 return ResponseEntity.notFound().build();

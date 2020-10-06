@@ -5,13 +5,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
+import java.util.stream.Stream;
 
 @Component
 @RequiredArgsConstructor
 public class ScrapeUtil {
 
     public static final String HREF = "href";
-    public static final String projectsClass = "text-bold flex-auto min-width-0";
+    public static final String projectsClass = "wb-break-all";
     public static final String fileAndDirectoriesClass = "js-navigation-open link-gray-dark";
     public static final String dataFileClass = "text-mono f6 flex-auto pr-3 flex-order-2 flex-md-order-1 mt-2 mt-md-0";
     static final String URL_GIT = "https://github.com";
@@ -22,6 +23,43 @@ public class ScrapeUtil {
         stringBuilder.append(separator);
         stringBuilder.append(path);
         return stringBuilder.toString();
+    }
+
+    public String getUrlConnection(final String path,
+                                   final String repository) {
+        StringBuilder stringBuilder = new StringBuilder(getUrlConnection(path));
+        stringBuilder.append(repository);
+        return stringBuilder.toString();
+    }
+
+    public String getUser(final String path) {
+        final String URI = removeUrl(path);
+       return Stream.of(URI.split(separator)).findFirst().get();
+    }
+
+    public String getRepositorio(final String path) {
+        return Stream.of(path.split(separator)).reduce((first, last) -> last).get();
+    }
+
+    public String getUri(final String user, final String repository) {
+        return user + separator + repository;
+    }
+
+    public boolean isValidRepository(final String projectName, final String repository) {
+        if (repository != null) {
+            if (repository.toLowerCase().equals(projectName.toLowerCase())) {
+                return true;
+            }
+        } else {
+            return true;
+        }
+        return false;
+    }
+
+    private String removeUrl(final String path) {
+        return path.replace("https://github.com/", "")
+                .replace("http://github.com/", "")
+                .replace("github.com/", "");
     }
 
     public String getExtension(final String fileName) {

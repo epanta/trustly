@@ -26,34 +26,52 @@ public class ScrapeServiceImplTest {
     private ScrapeServiceImpl scrapeService;
 
     private final String user = "epanta";
+    private final String url = "https://github.com/epanta/trustly";
 
+    @SpyBean
     private ScrapeUtil scrapeUtil;
 
     @BeforeEach
     public void setUp() throws Exception {
         Mockito.doReturn(new Document("")).when(scrapeService).getDocument(Mockito.anyString());
-        scrapeUtil = new ScrapeUtil();
     }
 
     @Test
-    void shouldThrowExceptionWhenGitHubUrlConnectionIsInvalid() throws IOException {
+    void shouldThrowExceptionWhenGitHubUrlConnectionIsInvalidWhenFindByUser() throws IOException {
 
         Mockito.doThrow(ProjectException.class).when(scrapeService).getDocument(Mockito.anyString());
 
         Throwable expectedMessage = Assertions.assertThrows(ProjectException.class, () -> {
-            scrapeService.findData(user);
+            scrapeService.findDataByUser(user);
         });
 
        Assertions.assertEquals("Error while reading project names.", expectedMessage.getMessage());
     }
 
     @Test
-    void shouldDoesNotThrowExceptionWhenUrlConnectionIsValid() throws IOException {
-        Assertions.assertDoesNotThrow( () -> scrapeService.findData(user));
+    void shouldThrowExceptionWhenGitHubUrlConnectionIsInvalidWhenFindByUrl() throws IOException {
+
+        Mockito.doThrow(ProjectException.class).when(scrapeService).getDocument(Mockito.anyString());
+
+        Throwable expectedMessage = Assertions.assertThrows(ProjectException.class, () -> {
+            scrapeService.findDataByUrl(url);
+        });
+
+        Assertions.assertEquals("Error while reading project names.", expectedMessage.getMessage());
     }
 
     @Test
-    void shouldThrowExceptionWhenScrapeRepositoryIsInvalid() throws IOException {
+    void shouldDoesNotThrowExceptionWhenUrlConnectionIsValidWhenFindByUser() throws IOException {
+        Assertions.assertDoesNotThrow( () -> scrapeService.findDataByUser(user));
+    }
+
+    @Test
+    void shouldDoesNotThrowExceptionWhenUrlConnectionIsValidWhenFindByUrl() throws IOException {
+        Assertions.assertDoesNotThrow( () -> scrapeService.findDataByUrl(url));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenScrapeRepositoryIsInvalidWhenFindByUser() throws IOException {
 
         Document doc = new Document("");
         doc.addClass(scrapeUtil.projectsClass);
@@ -62,7 +80,24 @@ public class ScrapeServiceImplTest {
         Mockito.doThrow(RepositoryDataException.class).when(scrapeService).scrapeRepository(Mockito.anyString());
 
         Throwable expectedMessage = Assertions.assertThrows(ProjectException.class, () -> {
-            scrapeService.findData(user);
+            scrapeService.findDataByUser(user);
+        });
+
+        Assertions.assertEquals("Error while reading repository name.", expectedMessage.getMessage());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenScrapeRepositoryIsInvalidWhenFindByUrl() throws IOException {
+
+        Document doc = new Document("");
+        doc.addClass(scrapeUtil.projectsClass);
+
+        Mockito.doReturn(doc).when(scrapeService).getDocument(Mockito.anyString());
+        Mockito.doReturn(true).when(scrapeUtil).isValidRepository(Mockito.anyString(), Mockito.anyString());
+        Mockito.doThrow(RepositoryDataException.class).when(scrapeService).scrapeRepository(Mockito.anyString());
+
+        Throwable expectedMessage = Assertions.assertThrows(ProjectException.class, () -> {
+            scrapeService.findDataByUrl(url);
         });
 
         Assertions.assertEquals("Error while reading repository name.", expectedMessage.getMessage());
@@ -76,6 +111,6 @@ public class ScrapeServiceImplTest {
 
         Mockito.doReturn(doc).when(scrapeService).getDocument(Mockito.anyString());
 
-        Assertions.assertDoesNotThrow(() -> scrapeService.findData(user));
+        Assertions.assertDoesNotThrow(() -> scrapeService.findDataByUser(user));
     }
 }
